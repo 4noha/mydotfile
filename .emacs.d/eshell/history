@@ -1,0 +1,12 @@
+tty
+bash
+bash
+tty
+bundle exec thin start -p 3000 > /dev/ttys005 &
+cd ../..
+bundle exec thin start -p 3000 > /dev/ttys005 &
+bash &
+bundle exec thin start -p 3000 > /dev/ttys005 &
+ls
+who
+bash
