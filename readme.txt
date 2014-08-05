@@ -1,3 +1,6 @@
+.emacs.dにクローン、下記コマンドで.emacsへのシンボリックリンクをホームディレクトリに作成
+ln -s ~/.emacs.d/.emacs ~/.emacs
+
 initloaderをつかって機能ごとにelファイルを書いています。
 .emacs.d/inits
 に各拡張をロードするelが置いてあるので好きに削除、追加をして下さい。
