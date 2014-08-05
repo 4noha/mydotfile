@@ -1,7 +1,7 @@
 ;;; revive.el --- Resume Emacs -*- coding: euc-jp -*-
-;;; (c) 1994-2012 by HIROSE Yuuji [yuuji@gentei.org]
-;;; $Id: revive.el,v 2.21 2012/08/12 11:56:06 yuuji Exp yuuji $
-;;; Last modified Thu Oct 18 14:47:17 2012 on firestorm
+;;; (c) 1994-2014 by HIROSE Yuuji [yuuji@gentei.org]
+;;; $Id: revive.el,v 2.22 2014/04/02 14:25:14 yuuji Exp $
+;;; Last modified Wed Apr  2 23:25:14 2014 on firestorm
 
 ;;;[[[   NOTICE 注意 NOTICE 注意 NOTICE 注意 NOTICE 注意 NOTICE 注意   ]]]
 ;;;--------------------------------------------------------------------------
@@ -228,7 +228,7 @@
 ;;; Code:
 
 (defconst revive:version
-  "$Id: revive.el,v 2.21 2012/08/12 11:56:06 yuuji Exp yuuji $"
+  "$Id: revive.el,v 2.22 2014/04/02 14:25:14 yuuji Exp $"
   "Version of revive.el")
 
 (defconst revive:version-prefix ";;;")
@@ -753,8 +753,9 @@ Variable-List is a return value of revive:varlist."
 	      )))
       (cond
        (success
-	(if (not (string= (revive:prop-buffer-name x) (buffer-name)))
-	    (rename-buffer (revive:prop-buffer-name x)))
+	(and (not (string= (revive:prop-buffer-name x) (buffer-name)))
+	     (not  (get-buffer (revive:prop-buffer-name x)))
+	     (rename-buffer (revive:prop-buffer-name x)))
 	(set-mark (revive:prop-mark x))
 	(goto-char (revive:prop-point x))
 	(and (fboundp 'region-active-p) (region-active-p) (deactivate-mark))
@@ -901,8 +902,11 @@ This functionality is considered to be migrated from `twittering-mode'."
 (provide 'revive)
 
 
-;; $Id: revive.el,v 2.21 2012/08/12 11:56:06 yuuji Exp yuuji $
+;; $Id: revive.el,v 2.22 2014/04/02 14:25:14 yuuji Exp $
 ;; $Log: revive.el,v $
+;; Revision 2.22  2014/04/02 14:25:14  yuuji
+;; Check existence of buffer
+;;
 ;; Revision 2.21  2012/08/12 11:56:06  yuuji
 ;; Switched to euc-jp.
 ;;
