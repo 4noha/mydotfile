@@ -1,55 +1,74 @@
-
-;-----------------------------------------------------------------------------
-;; グループ化せずにタブを表示
-(require 'cl)
-(when (require 'tabbar nil t)
-  (setq tabbar-buffer-groups-function
-	(lambda (b) (list "All Buffers")))
-  (setq tabbar-buffer-list-function
-	(lambda ()
-	  (remove-if
-	   (lambda(buffer)
-	     (unless (string-match (buffer-name buffer)
-		 "\\(*scratch*\\|*Apropos*\\|*shell*\\|*eshell*\\|*Customize*\\)")
-	       (find (aref (buffer-name buffer) 0) " *"))
-	     )
-	   (buffer-list))))
-(tabbar-mode))
-
+;;
+;; tabber-mode
+;;
+(require 'tabbar)
+(tabbar-mode 1)
+;;
+;; ref: http://d.hatena.ne.jp/plasticster/20110825/1314271209
+;; タブ上でマウスホイール操作無効
+(tabbar-mwheel-mode -1)
+ 
+;; グループ化しない
+(setq tabbar-buffer-groups-function nil)
+ 
 ;; 左に表示されるボタンを無効化
-(setq tabbar-home-button-enabled "")
-(setq tabbar-scroll-left-button-enabled "")
-(setq tabbar-scroll-right-button-enabled "")
-(setq tabbar-scroll-left-button-disabled "")
-(setq tabbar-scroll-right-button-disabled "")
-
-;; 色設定
- (set-face-attribute
-   'tabbar-default-face nil
-   :background "gray90") ;バー自体の色
-  (set-face-attribute ;非アクティブなタブ
-   'tabbar-unselected-face nil
-   :background "gray90"
-   :foreground "black"
-   :box nil)
-  (set-face-attribute ;アクティブなタブ
-   'tabbar-selected-face nil
-   :background "black"
-   :foreground "white"
-   :box nil)
-
-;; 幅設定
-  (set-face-attribute
-   'tabbar-separator-face nil
-   :height 0.7)
-
-;; Firefoxライクなキーバインドに
-(global-set-key [(control tab)]       'tabbar-forward)
-(global-set-key [(control shift ttab)] 'tabbar-backward)
-;; -nw では効かないので別のキーバインドを割り当てる
-(global-set-key (kbd "C-x n") 'tabbar-forward)
-(global-set-key (kbd "C-x p") 'tabbar-backward)
-
-;;F4ボタンで切り替え
-(global-set-key [f4] 'tabbar-mode)
-
+;;(dolist (btn '(tabbar-buffer-home-button
+;;               tabbar-scroll-left-button
+;;               tabbar-scroll-right-button))
+;;  (set btn (cons (cons "" nil)
+;;                 (cons "" nil))))
+ 
+;; タブに表示させるバッファの設定
+(defvar my-tabbar-displayed-buffers
+  '("*scratch*" "*Messages*" "*Backtrace*" "*Colors*" "*Faces*" "*vc-")
+  "*Regexps matches buffer names always included tabs.")
+ 
+(defun my-tabbar-buffer-list ()
+  "Return the list of buffers to show in tabs.
+Exclude buffers whose name starts with a space or an asterisk.
+The current buffer and buffers matches `my-tabbar-displayed-buffers'
+are always included."
+  (let* ((hides (list ?\  ?\*))
+         (re (regexp-opt my-tabbar-displayed-buffers))
+         (cur-buf (current-buffer))
+         (tabs (delq nil
+                     (mapcar (lambda (buf)
+                               (let ((name (buffer-name buf)))
+                                 (when (or (string-match re name)
+                                           (not (memq (aref name 0) hides)))
+                                   buf)))
+                             (buffer-list)))))
+    ;; Always include the current buffer.
+    (if (memq cur-buf tabs)
+        tabs
+      (cons cur-buf tabs))))
+ 
+(setq tabbar-buffer-list-function 'my-tabbar-buffer-list)
+ 
+;; appearances
+(setq tabbar-separator '(1.0)) ;; タブセパレータの長さ
+(set-face-attribute 'tabbar-default nil
+                    :family "Ricty"
+                    :foreground "#c4c1b0"
+                    :background "#002c37"
+                    :height 1.0)
+(set-face-attribute 'tabbar-unselected nil
+                    :foreground "#002c37"
+                    :background "#c4c1b0"
+                    :box nil)
+(set-face-attribute 'tabbar-selected nil
+                    :foreground "#e4007e"
+                    :background "#ffffff"
+                    :box nil)
+(set-face-attribute 'tabbar-button nil
+                    :box nil)
+(set-face-attribute 'tabbar-separator nil
+                    :foreground "#002c37"
+                    :background "#002c37"
+                    :height 1.0)
+ 
+;; key bindings
+(global-set-key [(C-tab)]   'tabbar-forward-tab)
+(global-set-key [(C-S-tab)] 'tabbar-backward-tab)
+(global-set-key "\C-]"      'tabbar-forward-tab)
+(global-set-key "\C-["      'tabbar-backward-tab)
